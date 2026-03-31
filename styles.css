@@ -63,11 +63,12 @@ input, select, textarea {
   cursor:pointer;
 }
 .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; border-color: transparent; }
-.btn-secondary { color: var(--primary); }
+.btn-secondary { color: #7a5a00; background: color-mix(in oklab, var(--accent) 35%, #fff); border-color: color-mix(in oklab, var(--accent) 55%, #fff); }
 .hero { margin-top: 2rem; background: linear-gradient(135deg, color-mix(in oklab, var(--primary) 20%, white), color-mix(in oklab, var(--secondary) 14%, transparent)); border-radius: var(--radius); padding: 3rem; }
 .hero h1 { margin:0 0 .8rem; font-size: clamp(1.8rem, 4vw, 2.6rem); }
 .hero-actions { display:flex; gap:.8rem; margin-top:1.2rem; }
 .section { margin: 2.2rem auto; }
+.section h2 { display:inline-block; padding: .2rem .6rem; border-radius: 8px; background: color-mix(in oklab, var(--accent) 35%, #fff); }
 .grid { display:grid; gap:1rem; }
 .quick-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
 .cards-grid { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }

@@ -32,7 +32,7 @@ function cardTemplate(item, type) {
   const mapBtn = type === 'Map' ? mapOpenMarkup(item) : '';
   const downloadBtn = type !== 'Map' ? downloadMarkup(item) : '';
   const tags = (item.tags || []).map(t => `<span class="tag">${t}</span>`).join('');
-  return `<article class="card" id="item-${item.id}" data-type="${type}">${imageMarkup(item)}<h3>${item.title}</h3><p class="meta">${typeLabel[type]} · ${item.category || 'Общее'} ${item.difficulty ? `· ${item.difficulty}` : ''} ${item.classLevel ? `· ${item.classLevel}` : ''}</p><p>${item.description}</p>${tags}<div class="toolbar">${mapBtn}${downloadBtn}</div></article>`;
+  return `<article class="card" id="item-${item.id}" data-type="${type}" data-id="${item.id}">${imageMarkup(item)}<h3>${item.title}</h3><p class="meta">${typeLabel[type]} · ${item.category || 'Общее'} ${item.difficulty ? `· ${item.difficulty}` : ''} ${item.classLevel ? `· ${item.classLevel}` : ''}</p><p>${item.description}</p>${tags}<div class="toolbar">${mapBtn}${downloadBtn}</div></article>`;
 }
 
 function group(containerId, items, key, type) {
@@ -80,22 +80,28 @@ function setupGlobalSearch() {
 
 function setupActions() {
   document.addEventListener('click', (e) => {
-    const openId = e.target?.dataset?.openMap;
-    if (openId) {
-      const item = state.data.maps.find(m => m.id === openId);
+    const card = e.target.closest('.card[data-id]');
+    if (!card) return;
+    const id = card.dataset.id;
+    const type = card.dataset.type;
+
+    if (type === 'Map') {
+      const item = state.data.maps.find(m => m.id === id);
       const src = item?.mapPath || item?.image;
       if (!src) return;
       document.getElementById('mapModalImage').src = src;
       document.getElementById('mapModal').classList.remove('hidden');
+      return;
     }
-    const downloadId = e.target?.dataset?.download;
-    if (downloadId) {
+
+    if (['Presentation', 'Film', 'Article', 'News', 'Exam'].includes(type)) {
       const all = ['presentations', 'films', 'articles', 'news', 'exams'].flatMap(k => state.data[k]);
-      const item = all.find(i => i.id === downloadId);
-      if (item?.fileData) {
-        const a = document.createElement('a');
-        a.href = item.fileData; a.download = item.fileName || `${item.title}.bin`; a.click();
-      }
+      const item = all.find(i => i.id === id);
+      if (!item?.fileData) return;
+      const a = document.createElement('a');
+      a.href = item.fileData;
+      a.download = item.fileName || `${item.title}.bin`;
+      a.click();
     }
   });
 
