@@ -1,8 +1,15 @@
-/* Geomania admin panel: local credential setup, PBKDF2 verification, lockout, and content creation. */
+/* Geomania admin panel: hash-verified login, lockout, and content CRUD (add/delete). */
 const STORAGE_KEY = 'geomaniaData';
 const AUTH_KEY = 'geomaniaAdminAuth';
-const ADMIN_KEY = 'geomaniaAdminCreds';
 const LOCK_KEY = 'geomaniaAdminLock';
+
+// Precomputed PBKDF2 hashes (username and password) using the same salt/iterations.
+const AUTH = {
+  saltBase64: 'gE7nD9sK2xQ4mV1p8YtR3A==',
+  iterations: 150000,
+  usernameHash: 'l/y5N25w5eXSyRmOrjmgC/gAmkAZs8iPJfp8FZAUlc4=',
+  passwordHash: 'Afm++ioO+F+o8SBrTCg2gbjYv/VcJ6VQ7nYzr3IS64A='
+};
 
 const byId = (id) => document.getElementById(id);
 
@@ -17,16 +24,16 @@ function getData() {
   return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"maps":[],"articles":[],"news":[],"presentations":[],"films":[],"exams":[]}');
 }
 
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
 function setAuth(auth) {
   sessionStorage.setItem(AUTH_KEY, auth ? '1' : '0');
 }
 
 function isAuth() {
   return sessionStorage.getItem(AUTH_KEY) === '1';
-}
-
-function getStoredCreds() {
-  return JSON.parse(localStorage.getItem(ADMIN_KEY) || 'null');
 }
 
 function isLocked() {
@@ -48,47 +55,30 @@ function clearLockout() {
   localStorage.removeItem(LOCK_KEY);
 }
 
-async function deriveHash(password, saltBase64) {
+function constantTimeEqualBase64(a, b) {
+  const aBytes = Uint8Array.from(atob(a), c => c.charCodeAt(0));
+  const bBytes = Uint8Array.from(atob(b), c => c.charCodeAt(0));
+  if (aBytes.length !== bBytes.length) return false;
+  let diff = 0;
+  for (let i = 0; i < aBytes.length; i += 1) diff |= aBytes[i] ^ bBytes[i];
+  return diff === 0;
+}
+
+async function deriveHash(value) {
   const enc = new TextEncoder();
-  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
-  const salt = Uint8Array.from(atob(saltBase64), c => c.charCodeAt(0));
-  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 120000, hash: 'SHA-256' }, keyMaterial, 256);
+  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(value), 'PBKDF2', false, ['deriveBits']);
+  const salt = Uint8Array.from(atob(AUTH.saltBase64), c => c.charCodeAt(0));
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt, iterations: AUTH.iterations, hash: 'SHA-256' },
+    keyMaterial,
+    256
+  );
   return btoa(String.fromCharCode(...new Uint8Array(bits)));
 }
 
-function randomSalt() {
-  const bytes = crypto.getRandomValues(new Uint8Array(16));
-  return btoa(String.fromCharCode(...bytes));
-}
-
-function showView({ setup = false, login = false, dashboard = false }) {
-  byId('setupView').classList.toggle('hidden', !setup);
-  byId('loginView').classList.toggle('hidden', !login);
-  byId('dashboardView').classList.toggle('hidden', !dashboard);
-}
-
 function routeView() {
-  const hasCreds = !!getStoredCreds();
-  if (isAuth() && hasCreds) return showView({ dashboard: true });
-  if (!hasCreds) return showView({ setup: true });
-  return showView({ login: true });
-}
-
-async function setupHandler(e) {
-  e.preventDefault();
-  const form = new FormData(e.target);
-  const username = String(form.get('username') || '').trim();
-  const password = String(form.get('password') || '').trim();
-  if (username.length < 4 || password.length < 8) {
-    notify('setupMessage', 'Username must be 4+ chars and password 8+ chars.', false);
-    return;
-  }
-  const salt = randomSalt();
-  const passHash = await deriveHash(password, salt);
-  localStorage.setItem(ADMIN_KEY, JSON.stringify({ username, salt, passHash }));
-  notify('setupMessage', 'Admin account created. Please sign in.');
-  e.target.reset();
-  routeView();
+  byId('loginView').classList.toggle('hidden', isAuth());
+  byId('dashboardView').classList.toggle('hidden', !isAuth());
 }
 
 async function loginHandler(e) {
@@ -103,14 +93,12 @@ async function loginHandler(e) {
   const form = new FormData(e.target);
   const username = String(form.get('username') || '').trim();
   const password = String(form.get('password') || '').trim();
-  const creds = getStoredCreds();
-  if (!creds) {
-    routeView();
-    return;
-  }
 
-  const candidate = await deriveHash(password, creds.salt);
-  if (username === creds.username && candidate === creds.passHash) {
+  const [uHash, pHash] = await Promise.all([deriveHash(username), deriveHash(password)]);
+  const usernameOk = constantTimeEqualBase64(uHash, AUTH.usernameHash);
+  const passwordOk = constantTimeEqualBase64(pHash, AUTH.passwordHash);
+
+  if (usernameOk && passwordOk) {
     clearLockout();
     setAuth(true);
     routeView();
@@ -144,13 +132,40 @@ function addContentHandler(e) {
   }
 
   data[type].unshift(item);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  saveData(data);
   e.target.reset();
   notify('adminNotice', `${type.slice(0, -1)} added successfully.`);
+  renderDeleteList();
+}
+
+function renderDeleteList() {
+  const type = byId('deleteType').value;
+  const data = getData();
+  const list = data[type] || [];
+  byId('deleteList').innerHTML = list.length
+    ? list.map(item => `<article class="card"><h3>${item.title}</h3><p class="meta">${item.category || 'General'}</p><button class="btn" data-delete-id="${item.id}" data-delete-type="${type}">Delete</button></article>`).join('')
+    : '<p class="muted">No content in this section.</p>';
+}
+
+function deleteItem(type, id) {
+  const data = getData();
+  if (!data[type]) return;
+  data[type] = data[type].filter(item => item.id !== id);
+  saveData(data);
+  notify('adminNotice', `Item deleted from ${type}.`);
+  renderDeleteList();
+}
+
+function setMode(mode) {
+  const addMode = mode === 'add';
+  byId('contentForm').classList.toggle('hidden', !addMode);
+  byId('deletePanel').classList.toggle('hidden', addMode);
+  byId('modeAdd').classList.toggle('btn-primary', addMode);
+  byId('modeDelete').classList.toggle('btn-primary', !addMode);
+  byId('modeDelete').classList.toggle('btn', addMode);
 }
 
 function initAdmin() {
-  byId('setupForm').addEventListener('submit', setupHandler);
   byId('loginForm').addEventListener('submit', loginHandler);
   byId('contentForm').addEventListener('submit', addContentHandler);
   byId('logoutBtn').addEventListener('click', () => {
@@ -158,6 +173,22 @@ function initAdmin() {
     routeView();
     notify('loginMessage', 'Logged out.');
   });
+
+  byId('modeAdd').addEventListener('click', () => setMode('add'));
+  byId('modeDelete').addEventListener('click', () => {
+    setMode('delete');
+    renderDeleteList();
+  });
+
+  byId('deleteType').addEventListener('change', renderDeleteList);
+  byId('deleteList').addEventListener('click', (e) => {
+    const id = e.target?.dataset?.deleteId;
+    const type = e.target?.dataset?.deleteType;
+    if (!id || !type) return;
+    deleteItem(type, id);
+  });
+
+  setMode('add');
   routeView();
 }
 
