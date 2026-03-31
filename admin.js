@@ -95,7 +95,7 @@ async function loginHandler(e) {
   const lock = isLocked();
   if (lock.until > Date.now()) {
     const min = Math.ceil((lock.until - Date.now()) / 60000);
-    notify('loginMessage', `Too many attempts. Try again in ${min} min.`, false);
+    notify('loginMessage', `Слишком много попыток. Повторите через ${min} мин.`, false);
     return;
   }
 
@@ -111,10 +111,10 @@ async function loginHandler(e) {
     clearLockout();
     setAuth(true);
     routeView();
-    notify('adminNotice', 'Welcome back, Admin.');
+    notify('adminNotice', 'Вход выполнен.');
   } else {
     const fail = registerFailAttempt();
-    const msg = fail.attempts >= 5 ? 'Too many failed attempts. Locked for 5 minutes.' : `Invalid credentials. Attempt ${fail.attempts}/5.`;
+    const msg = fail.attempts >= 5 ? 'Слишком много ошибок. Доступ заблокирован на 5 минут.' : `Неверные данные. Попытка ${fail.attempts}/5.`;
     notify('loginMessage', msg, false);
   }
 }
@@ -126,7 +126,9 @@ async function addContentHandler(e) {
   const data = getData();
 
   const imageFile = formData.get('imageFile');
+  const materialFile = formData.get('materialFile');
   const image = await fileToDataUrl(imageFile && imageFile.size ? imageFile : null);
+  const fileData = await fileToDataUrl(materialFile && materialFile.size ? materialFile : null);
 
   const item = {
     id: crypto.randomUUID(),
@@ -136,18 +138,21 @@ async function addContentHandler(e) {
     difficulty: String(formData.get('difficulty') || '').trim() || undefined,
     classLevel: String(formData.get('classLevel') || '').trim() || undefined,
     tags: String(formData.get('tags') || '').split(',').map(t => t.trim()).filter(Boolean),
-    image
+    image,
+    mapPath: String(formData.get('mapPath') || '').trim(),
+    fileName: materialFile && materialFile.name ? materialFile.name : undefined,
+    fileData
   };
 
   if (!data[type] || !item.title || !item.category || !item.description) {
-    notify('adminNotice', 'Please fill all required fields correctly.', false);
+    notify('adminNotice', 'Заполните обязательные поля корректно.', false);
     return;
   }
 
   data[type].unshift(item);
   saveData(data);
   e.target.reset();
-  notify('adminNotice', `${type.slice(0, -1)} added successfully.`);
+  notify('adminNotice', `${type.slice(0, -1)} успешно добавлен(а).`);
   renderDeleteList();
 }
 
@@ -157,7 +162,7 @@ function renderDeleteList() {
   const list = data[type] || [];
   byId('deleteList').innerHTML = list.length
     ? list.map(item => `<article class="card"><h3>${item.title}</h3><p class="meta">${item.category || 'General'}</p><button class="btn" data-delete-id="${item.id}" data-delete-type="${type}">Delete</button></article>`).join('')
-    : '<p class="muted">No content in this section.</p>';
+    : '<p class="muted">В этом разделе пока нет контента.</p>';
 }
 
 function deleteItem(type, id) {
@@ -165,7 +170,7 @@ function deleteItem(type, id) {
   if (!data[type]) return;
   data[type] = data[type].filter(item => item.id !== id);
   saveData(data);
-  notify('adminNotice', `Item deleted from ${type}.`);
+  notify('adminNotice', `Материал удалён из раздела ${type}.`);
   renderDeleteList();
 }
 
@@ -184,7 +189,7 @@ function initAdmin() {
   byId('logoutBtn').addEventListener('click', () => {
     setAuth(false);
     routeView();
-    notify('loginMessage', 'Logged out.');
+    notify('loginMessage', 'Вы вышли из админ-панели.');
   });
 
   byId('modeAdd').addEventListener('click', () => setMode('add'));

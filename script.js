@@ -1,212 +1,118 @@
-/* Geomania core app: dynamic rendering, filters, search, favorites, theming, and localStorage persistence. */
 const STORAGE_KEY = 'geomaniaData';
 const THEME_KEY = 'geomaniaTheme';
-const FAV_KEY = 'geomaniaFavorites';
 
 const seedData = {
   maps: [
-    { id: crypto.randomUUID(), title: 'World Climate Zones', category: 'Climate', difficulty: 'Beginner', description: 'Interactive climate classification map.', tags: ['climate', 'zones'], image: '' },
-    { id: crypto.randomUUID(), title: 'Economic Regions of Europe', category: 'Economy', difficulty: 'Advanced', description: 'Compare GDP and trade corridors.', tags: ['economy', 'europe'], image: '' },
-    { id: crypto.randomUUID(), title: 'Countries and Capitals Drill', category: 'Countries', difficulty: 'Intermediate', description: 'Practice country-capital pairing.', tags: ['countries', 'capitals'], image: '' }
+    { id: crypto.randomUUID(), title: 'Климатические пояса мира', category: 'Климат', difficulty: 'Начальный', description: 'Интерактивная карта климатических зон.', tags: ['климат', 'зоны'], image: '', mapPath: 'maps/climate-world.jpg' },
+    { id: crypto.randomUUID(), title: 'Экономические регионы Европы', category: 'Экономика', difficulty: 'Продвинутый', description: 'Сравнение ВВП и торговых коридоров.', tags: ['экономика', 'европа'], image: '', mapPath: 'maps/europe-economy.jpg' }
   ],
-  exams: [
-    { id: crypto.randomUUID(), title: 'Plate Tectonics Basics', category: 'Theory', description: 'Core concepts and terminology.', image: '' },
-    { id: crypto.randomUUID(), title: 'Climate Data Interpretation', category: 'Practice', description: 'Interpret charts and map overlays.', image: '' },
-    { id: crypto.randomUUID(), title: 'Regional Geography Solutions Pack', category: 'Solutions', description: 'Step-by-step solution archive.', image: '' }
-  ],
-  presentations: [
-    { id: crypto.randomUUID(), title: 'Rivers of Asia', category: 'Hydrology', classLevel: 'Class 8', description: 'Major river systems and impacts.', image: '' },
-    { id: crypto.randomUUID(), title: 'Urbanization Patterns', category: 'Population', classLevel: 'Class 10', description: 'Global urban growth trends.', image: '' }
-  ],
-  articles: [
-    { id: crypto.randomUUID(), title: 'How Mountains Form', category: 'Physical geography', description: 'Orogeny and plate boundaries explained.', tags: ['tectonics'], image: '' },
-    { id: crypto.randomUUID(), title: 'Global Trade Routes', category: 'Economic geography', description: 'How shipping lanes shape economies.', tags: ['trade', 'oceans'], image: '' },
-    { id: crypto.randomUUID(), title: 'Deserts That Once Were Green', category: 'Interesting facts', description: 'Paleoclimate evidence from deserts.', tags: ['deserts', 'history'], image: '' }
-  ],
-  films: [
-    { id: crypto.randomUUID(), title: 'Blue Planet Frontiers', category: 'Nature', description: 'Ecosystems and biodiversity.', image: '' },
-    { id: crypto.randomUUID(), title: 'Storm Systems Explained', category: 'Climate', description: 'Mechanics of extreme weather.', image: '' },
-    { id: crypto.randomUUID(), title: 'Inside Japan', category: 'Countries', description: 'Culture and geographic constraints.', image: '' },
-    { id: crypto.randomUUID(), title: 'Earth Lab', category: 'Science', description: 'Geoscience breakthroughs.', image: '' },
-    { id: crypto.randomUUID(), title: 'The Atlas Archives', category: 'Documentaries', description: 'Historic cartography stories.', image: '' }
-  ],
-  news: [
-    { id: crypto.randomUUID(), title: 'New Volcano Monitoring Satellite', category: 'Science', description: 'A new platform improves eruption warnings.', image: '' },
-    { id: crypto.randomUUID(), title: 'Geomania Weekly Quiz Released', category: 'Education', description: 'Fresh practice set added for students.', image: '' }
-  ]
+  exams: [{ id: crypto.randomUUID(), title: 'Основы тектоники', category: 'Теория', description: 'Базовые понятия и термины.' }],
+  presentations: [{ id: crypto.randomUUID(), title: 'Реки Азии', category: 'Гидрология', classLevel: '8 класс', description: 'Крупнейшие речные системы.', fileName: 'реки-азии.pdf', fileData: '' }],
+  articles: [{ id: crypto.randomUUID(), title: 'Как формируются горы', category: 'Физическая география', description: 'Процесс орогенеза простыми словами.', tags: ['тектоника'] }],
+  films: [{ id: crypto.randomUUID(), title: 'Планета океанов', category: 'Природа', description: 'Документальный фильм об экосистемах.', fileName: 'planet-oceans.mp4', fileData: '' }],
+  news: [{ id: crypto.randomUUID(), title: 'Новая спутниковая миссия', category: 'Наука', description: 'Запущен новый спутник наблюдения Земли.' }]
 };
 
-const pageMap = {
-  maps: 'maps.html',
-  articles: 'articles.html',
-  news: 'index.html',
-  presentations: 'presentations.html',
-  films: 'films.html',
-  exams: 'exams.html'
-};
+const pageMap = { maps: 'maps.html', articles: 'articles.html', news: 'index.html', presentations: 'presentations.html', films: 'films.html', exams: 'exams.html' };
 
-const loadData = () => {
-  const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-  if (data) return data;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(seedData));
-  return seedData;
-};
+const loadData = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || (localStorage.setItem(STORAGE_KEY, JSON.stringify(seedData)), seedData);
 const saveData = (data) => localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-const getFavorites = () => JSON.parse(localStorage.getItem(FAV_KEY) || '[]');
-const setFavorites = (favs) => localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+const state = { data: loadData() };
 
-const state = { data: loadData(), favorites: getFavorites() };
+const typeLabel = { Map: 'Карта', Article: 'Статья', News: 'Новость', Presentation: 'Презентация', Film: 'Фильм', Exam: 'Экзамен' };
 
-function toggleTheme() {
-  const current = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-  document.documentElement.dataset.theme = current;
-  localStorage.setItem(THEME_KEY, current);
-}
+function toggleTheme() { const current = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = current; localStorage.setItem(THEME_KEY, current); }
+function initTheme() { document.documentElement.dataset.theme = localStorage.getItem(THEME_KEY) || 'light'; }
 
-function initTheme() {
-  const saved = localStorage.getItem(THEME_KEY) || 'light';
-  document.documentElement.dataset.theme = saved;
-}
-
-function imageMarkup(item) {
-  return item.image ? `<img class="card-media" src="${item.image}" alt="${item.title}" loading="lazy" />` : '<div class="card-media"></div>';
-}
+function imageMarkup(item) { return item.image ? `<img class="card-media" src="${item.image}" alt="${item.title}" loading="lazy" />` : '<div class="card-media"></div>'; }
+function downloadMarkup(item) { return item.fileData ? `<button class="btn" data-download="${item.id}">Скачать</button>` : ''; }
+function mapOpenMarkup(item) { return item.mapPath || item.image ? `<button class="btn" data-open-map="${item.id}">Открыть карту</button>` : ''; }
 
 function cardTemplate(item, type) {
-  const isFav = state.favorites.includes(item.id);
+  const mapBtn = type === 'Map' ? mapOpenMarkup(item) : '';
+  const downloadBtn = type !== 'Map' ? downloadMarkup(item) : '';
   const tags = (item.tags || []).map(t => `<span class="tag">${t}</span>`).join('');
-  return `<article class="card" id="item-${item.id}"><button class="fav-btn" data-fav="${item.id}" title="Toggle favorite">${isFav ? '★' : '☆'}</button>${imageMarkup(item)}<h3>${item.title}</h3><p class="meta">${type} · ${item.category || 'General'} ${item.difficulty ? `· ${item.difficulty}` : ''} ${item.classLevel ? `· ${item.classLevel}` : ''}</p><p>${item.description}</p>${tags}</article>`;
+  return `<article class="card" id="item-${item.id}" data-type="${type}">${imageMarkup(item)}<h3>${item.title}</h3><p class="meta">${typeLabel[type]} · ${item.category || 'Общее'} ${item.difficulty ? `· ${item.difficulty}` : ''} ${item.classLevel ? `· ${item.classLevel}` : ''}</p><p>${item.description}</p>${tags}<div class="toolbar">${mapBtn}${downloadBtn}</div></article>`;
 }
 
-function withSkeleton(containerId, renderer) {
-  const node = document.getElementById(containerId);
-  if (!node) return;
-  node.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
-  setTimeout(renderer, 250);
+function group(containerId, items, key, type) {
+  const groups = items.reduce((a, i) => ((a[i[key] || 'Другое'] ??= []).push(i), a), {});
+  document.getElementById(containerId).innerHTML = Object.entries(groups).map(([g, v]) => `<section class="group"><h2>${g}</h2><div class="grid cards-grid">${v.map(x => cardTemplate(x, type)).join('')}</div></section>`).join('');
 }
 
 function renderHome() {
-  const quick = [
-    { title: 'Maps', url: 'maps.html' },
-    { title: 'Exams', url: 'exams.html' },
-    { title: 'Presentations', url: 'presentations.html' },
-    { title: 'Articles', url: 'articles.html' }
-  ];
-  document.getElementById('quickAccess').innerHTML = quick.map(q => `<a class="card" href="${q.url}"><h3>${q.title}</h3><p class="muted">Open ${q.title.toLowerCase()} section</p></a>`).join('');
-
-  withSkeleton('newsGrid', () => {
-    document.getElementById('newsGrid').innerHTML = state.data.news.map(item => cardTemplate(item, 'News')).join('');
-  });
-  withSkeleton('popularMapsGrid', () => {
-    document.getElementById('popularMapsGrid').innerHTML = state.data.maps.slice(0, 3).map(item => cardTemplate(item, 'Map')).join('');
-  });
-  withSkeleton('articlesPreviewGrid', () => {
-    document.getElementById('articlesPreviewGrid').innerHTML = state.data.articles.slice(0, 3).map(item => cardTemplate(item, 'Article')).join('');
-  });
+  const quick = [{ title: 'Карты', url: 'maps.html' }, { title: 'Экзамены', url: 'exams.html' }, { title: 'Презентации', url: 'presentations.html' }, { title: 'Статьи', url: 'articles.html' }];
+  document.getElementById('quickAccess').innerHTML = quick.map(q => `<a class="card" href="${q.url}"><h3>${q.title}</h3><p class="muted">Перейти в раздел</p></a>`).join('');
+  document.getElementById('newsGrid').innerHTML = state.data.news.map(i => cardTemplate(i, 'News')).join('');
+  document.getElementById('popularMapsGrid').innerHTML = state.data.maps.slice(0, 3).map(i => cardTemplate(i, 'Map')).join('');
+  document.getElementById('articlesPreviewGrid').innerHTML = state.data.articles.slice(0, 3).map(i => cardTemplate(i, 'Article')).join('');
 }
 
 function renderMaps() {
-  const categoryFilter = document.getElementById('categoryFilter');
-  const categories = [...new Set(state.data.maps.map(m => m.category))];
-  categoryFilter.innerHTML += categories.map(c => `<option>${c}</option>`).join('');
-
-  const runFilter = () => {
+  const cFilter = document.getElementById('categoryFilter');
+  cFilter.innerHTML += [...new Set(state.data.maps.map(m => m.category))].map(c => `<option>${c}</option>`).join('');
+  const run = () => {
     const q = document.getElementById('mapsSearch').value.toLowerCase();
-    const c = categoryFilter.value;
-    const d = document.getElementById('difficultyFilter').value;
-    const filtered = state.data.maps.filter(m =>
-      (c === 'all' || m.category === c) &&
-      (d === 'all' || m.difficulty === d) &&
-      (`${m.title} ${m.description} ${(m.tags || []).join(' ')}`.toLowerCase().includes(q))
-    );
-    document.getElementById('mapsGrid').innerHTML = filtered.map(m => cardTemplate(m, 'Map')).join('') || '<p class="muted">No maps found.</p>';
+    const c = cFilter.value; const d = document.getElementById('difficultyFilter').value;
+    const filtered = state.data.maps.filter(m => (c === 'all' || m.category === c) && (d === 'all' || m.difficulty === d) && `${m.title} ${m.description}`.toLowerCase().includes(q));
+    document.getElementById('mapsGrid').innerHTML = filtered.map(m => cardTemplate(m, 'Map')).join('') || '<p class="muted">Ничего не найдено.</p>';
   };
-
-  ['mapsSearch', 'categoryFilter', 'difficultyFilter'].forEach(id => document.getElementById(id).addEventListener('input', runFilter));
-  runFilter();
+  ['mapsSearch', 'categoryFilter', 'difficultyFilter'].forEach(id => document.getElementById(id).addEventListener('input', run));
+  run();
 }
 
-function renderGrouped(containerId, items, groupKey, type) {
-  const groups = items.reduce((acc, item) => {
-    const key = item[groupKey] || 'Other';
-    acc[key] = acc[key] || [];
-    acc[key].push(item);
-    return acc;
-  }, {});
-
-  document.getElementById(containerId).innerHTML = Object.entries(groups)
-    .map(([group, values]) => `<section class="group"><h2>${group}</h2><div class="grid cards-grid">${values.map(v => cardTemplate(v, type)).join('')}</div></section>`)
-    .join('');
-}
-
-function renderExams() { renderGrouped('examSections', state.data.exams, 'category', 'Exam'); }
-function renderPresentations() { renderGrouped('presentationsGrouped', state.data.presentations, 'classLevel', 'Presentation'); }
-function renderArticles() { renderGrouped('articlesGrouped', state.data.articles, 'category', 'Article'); }
-function renderFilms() { renderGrouped('filmsGrouped', state.data.films, 'category', 'Film'); }
+function renderExams() { group('examSections', state.data.exams, 'category', 'Exam'); }
+function renderPresentations() { group('presentationsGrouped', state.data.presentations, 'classLevel', 'Presentation'); }
+function renderArticles() { group('articlesGrouped', state.data.articles, 'category', 'Article'); }
+function renderFilms() { group('filmsGrouped', state.data.films, 'category', 'Film'); }
 
 function setupGlobalSearch() {
-  const input = document.getElementById('globalSearch');
-  const box = document.getElementById('searchResults');
-  if (!input || !box) return;
-
+  const input = document.getElementById('globalSearch'); const box = document.getElementById('searchResults'); if (!input || !box) return;
   input.addEventListener('input', () => {
     const q = input.value.trim().toLowerCase();
-    if (!q) {
-      box.classList.add('hidden');
-      box.innerHTML = '';
-      return;
-    }
+    if (!q) return box.classList.add('hidden');
     const sources = ['maps', 'articles', 'news', 'presentations', 'films', 'exams'];
-    const results = sources.flatMap(source => state.data[source].map(item => ({ ...item, source })))
-      .filter(item => (`${item.title} ${item.description} ${item.category || ''}`.toLowerCase().includes(q)))
-      .slice(0, 12);
-
-    box.innerHTML = results.map(r => {
-      const page = pageMap[r.source] || 'index.html';
-      const href = `${page}#item-${r.id}`;
-      return `<a class="search-link" href="${href}"><div class="card">${imageMarkup(r)}<p class="meta">${r.source}</p><h3>${r.title}</h3><p>${r.description}</p></div></a>`;
-    }).join('') || '<p class="muted">No matches.</p>';
+    const results = sources.flatMap(source => state.data[source].map(item => ({ ...item, source }))).filter(i => `${i.title} ${i.description}`.toLowerCase().includes(q));
+    box.innerHTML = results.slice(0, 12).map(r => `<a class="search-link" href="${(pageMap[r.source] || 'index.html')}#item-${r.id}"><div class="card">${imageMarkup(r)}<p class="meta">${r.source}</p><h3>${r.title}</h3><p>${r.description}</p></div></a>`).join('') || '<p class="muted">Совпадений нет.</p>';
     box.classList.remove('hidden');
   });
+}
 
+function setupActions() {
   document.addEventListener('click', (e) => {
-    if (!box.contains(e.target) && e.target !== input) box.classList.add('hidden');
+    const openId = e.target?.dataset?.openMap;
+    if (openId) {
+      const item = state.data.maps.find(m => m.id === openId);
+      const src = item?.mapPath || item?.image;
+      if (!src) return;
+      document.getElementById('mapModalImage').src = src;
+      document.getElementById('mapModal').classList.remove('hidden');
+    }
+    const downloadId = e.target?.dataset?.download;
+    if (downloadId) {
+      const all = ['presentations', 'films', 'articles', 'news', 'exams'].flatMap(k => state.data[k]);
+      const item = all.find(i => i.id === downloadId);
+      if (item?.fileData) {
+        const a = document.createElement('a');
+        a.href = item.fileData; a.download = item.fileName || `${item.title}.bin`; a.click();
+      }
+    }
   });
+
+  document.getElementById('closeMapModal')?.addEventListener('click', () => document.getElementById('mapModal').classList.add('hidden'));
 }
 
-function setupFavorites() {
-  document.addEventListener('click', (e) => {
-    const id = e.target?.dataset?.fav;
-    if (!id) return;
-    state.favorites = state.favorites.includes(id) ? state.favorites.filter(f => f !== id) : [...state.favorites, id];
-    setFavorites(state.favorites);
-    location.reload();
-  });
-}
-
-function scrollToHashTarget() {
-  const targetId = window.location.hash?.replace('#', '');
-  if (!targetId) return;
-  const target = document.getElementById(targetId);
-  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
+function scrollToHash() { const id = window.location.hash?.slice(1); if (id) document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
 
 function init() {
   initTheme();
   document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
   setupGlobalSearch();
-  setupFavorites();
-
-  const page = document.body.dataset.page;
-  if (page === 'home') renderHome();
-  if (page === 'maps') renderMaps();
-  if (page === 'exams') renderExams();
-  if (page === 'presentations') renderPresentations();
-  if (page === 'articles') renderArticles();
-  if (page === 'films') renderFilms();
-
+  setupActions();
+  const p = document.body.dataset.page;
+  if (p === 'home') renderHome(); if (p === 'maps') renderMaps(); if (p === 'exams') renderExams(); if (p === 'presentations') renderPresentations(); if (p === 'articles') renderArticles(); if (p === 'films') renderFilms();
   saveData(state.data);
-  setTimeout(scrollToHashTarget, 260);
+  setTimeout(scrollToHash, 150);
 }
 
 document.addEventListener('DOMContentLoaded', init);
