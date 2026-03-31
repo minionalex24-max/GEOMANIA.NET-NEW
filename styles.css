@@ -48,16 +48,16 @@ body {
   position: sticky;
   top: 0;
   z-index: 50;
-  backdrop-filter: blur(20px) saturate(180%);
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: #050505;
+  border-bottom: 1px solid rgba(255,255,255,0.14);
 }
 .header-content { display:flex; align-items:center; gap:1rem; padding:.8rem 0; }
-.logo { font-weight:600; font-size:1.15rem; letter-spacing:-.02em; color:var(--text); position:relative; }
-.logo::after { content:""; position:absolute; left:0; bottom:-6px; width:32%; height:2px; background:var(--accent); border-radius:10px; }
+.logo { font-weight:600; font-size:1.15rem; letter-spacing:-.02em; color:#fff; position:relative; padding-left:2.1rem; display:inline-flex; align-items:center; }
+.logo::before { content:""; position:absolute; left:0; width:1.6rem; height:1.6rem; background:url("logo.png") center/contain no-repeat; }
+.logo::after { content:""; position:absolute; left:2.1rem; bottom:-6px; width:32%; height:2px; background:var(--accent); border-radius:10px; }
 .main-nav { display:flex; gap:1.2rem; flex-wrap:wrap; }
-.main-nav a { color:var(--muted); font-size:.95rem; font-weight:500; position:relative; transition:.2s; }
-.main-nav a:hover, .main-nav a.active { color: var(--text); }
+.main-nav a { color:rgba(255,255,255,.78); font-size:.95rem; font-weight:500; position:relative; transition:.2s; }
+.main-nav a:hover, .main-nav a.active { color: #fff; }
 .header-tools { margin-left:auto; display:flex; gap:.6rem; }
 
 input, select, textarea, button { font: inherit; }
@@ -176,3 +176,7 @@ textarea { min-height: 110px; }
 }
 
 .modal-close { background: var(--accent); color: #1f2937; border: none; font-weight: 600; margin-bottom: .7rem; }
+
+.quick-grid .card { background: linear-gradient(155deg, color-mix(in oklab, var(--primary) 18%, #fff), color-mix(in oklab, var(--secondary) 14%, #fff)); border: 1px solid color-mix(in oklab, var(--primary) 28%, #fff); text-align: left; }
+.quick-grid .card h3 { color: #0b3b76; margin-bottom: .2rem; }
+.quick-grid .card p { color: #124f7a; }
