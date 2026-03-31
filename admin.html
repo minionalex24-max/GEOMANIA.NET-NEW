@@ -12,21 +12,10 @@
 </head>
 <body data-page="admin">
   <main class="admin-wrap">
-    <section id="setupView" class="admin-card hidden">
-      <h1>Admin Setup</h1>
-      <p class="muted">Create the first admin account on this device. Credentials are not hardcoded in client code.</p>
-      <form id="setupForm" class="form-grid">
-        <input name="username" minlength="4" required placeholder="Create username" />
-        <input name="password" type="password" minlength="8" required placeholder="Create password" />
-        <button class="btn btn-primary" type="submit">Create Admin</button>
-      </form>
-      <p id="setupMessage" class="status"></p>
-    </section>
-
-    <section id="loginView" class="admin-card hidden">
+    <section id="loginView" class="admin-card">
       <h1>Admin Login</h1>
-      <p class="muted">Sign in to manage Geomania content.</p>
-      <form id="loginForm" class="form-grid">
+      <p class="muted">Authorized personnel only.</p>
+      <form id="loginForm" class="form-grid" autocomplete="off">
         <input name="username" required placeholder="Username" autocomplete="username" />
         <input name="password" type="password" required placeholder="Password" autocomplete="current-password" />
         <button class="btn btn-primary" type="submit">Login</button>
@@ -41,6 +30,12 @@
       </aside>
       <section class="admin-main">
         <h1>Content Manager</h1>
+
+        <div class="toolbar">
+          <button id="modeAdd" class="btn btn-primary" type="button">Add mode</button>
+          <button id="modeDelete" class="btn" type="button">Delete mode</button>
+        </div>
+
         <form id="contentForm" class="form-grid">
           <select name="type" id="contentType" required>
             <option value="maps">Add Map</option>
@@ -57,6 +52,21 @@
           <input name="classLevel" placeholder="Class (optional)" />
           <button class="btn btn-primary" type="submit">Add Content</button>
         </form>
+
+        <section id="deletePanel" class="hidden">
+          <h2>Delete Content</h2>
+          <div class="toolbar">
+            <select id="deleteType">
+              <option value="maps">Maps</option>
+              <option value="articles">Articles</option>
+              <option value="news">News</option>
+              <option value="presentations">Presentations</option>
+              <option value="films">Films</option>
+            </select>
+          </div>
+          <div id="deleteList" class="stack"></div>
+        </section>
+
         <p id="adminNotice" class="status"></p>
       </section>
     </section>
