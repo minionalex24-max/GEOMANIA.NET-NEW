@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geomania | Админ-панель</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="admin.js"></script>
+</head>
+<body data-page="admin">
+  <main class="admin-wrap">
+    <section id="loginView" class="admin-card">
+      <h1>Вход администратора</h1>
+      <p class="muted">Доступ только для авторизованных пользователей.</p>
+      <form id="loginForm" class="form-grid" autocomplete="off">
+        <input name="username" required placeholder="Логин" autocomplete="username" />
+        <input name="password" type="password" required placeholder="Пароль" autocomplete="current-password" />
+        <button class="btn btn-primary" type="submit">Войти</button>
+      </form>
+      <p id="loginMessage" class="status"></p>
+    </section>
+
+    <section id="dashboardView" class="admin-dashboard hidden">
+      <aside class="admin-sidebar">
+        <h2>Geomania Админ</h2>
+        <button id="logoutBtn" class="btn btn-secondary">Выйти</button>
+      </aside>
+      <section class="admin-main">
+        <h1>Управление контентом</h1>
+
+        <div class="toolbar">
+          <button id="modeAdd" class="btn btn-primary" type="button">Режим добавления</button>
+          <button id="modeDelete" class="btn" type="button">Режим удаления</button>
+        </div>
+
+        <form id="contentForm" class="form-grid">
+          <select name="type" id="contentType" required>
+            <option value="maps">Добавить карту</option><option value="articles">Добавить статью</option><option value="news">Добавить новость</option><option value="presentations">Добавить презентацию</option><option value="films">Добавить фильм</option>
+          </select>
+          <input name="title" required placeholder="Название" />
+          <input name="category" required placeholder="Категория / Тема" />
+          <textarea name="description" required placeholder="Описание"></textarea>
+          <input name="tags" placeholder="Теги (через запятую)" />
+          <input name="difficulty" placeholder="Сложность (необязательно)" />
+          <input name="classLevel" placeholder="Класс (необязательно)" />
+          <input name="mapPath" placeholder="Путь к карте (например maps/world.jpg)" />
+          <input name="imageFile" type="file" accept="image/*" />
+          <input name="materialFile" type="file" />
+          <button class="btn btn-primary" type="submit">Добавить материал</button>
+        </form>
+
+        <section id="deletePanel" class="hidden">
+          <h2>Удаление контента</h2>
+          <div class="toolbar"><select id="deleteType"><option value="maps">Карты</option><option value="articles">Статьи</option><option value="news">Новости</option><option value="presentations">Презентации</option><option value="films">Фильмы</option></select></div>
+          <div id="deleteList" class="stack"></div>
+        </section>
+
+        <p id="adminNotice" class="status"></p>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

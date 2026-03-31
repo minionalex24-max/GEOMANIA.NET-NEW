@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geomania | Главная</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="script.js"></script>
+</head>
+<body data-page="home">
+  <header class="site-header">
+    <div class="container header-content">
+      <a href="index.html" class="logo">Geomania</a>
+      <nav class="main-nav">
+        <a href="index.html" class="active">Главная</a><a href="maps.html">Карты</a><a href="exams.html">Экзамены</a><a href="presentations.html">Презентации</a><a href="articles.html">Статьи</a><a href="films.html">Фильмы</a><a href="#news">Новости</a>
+      </nav>
+      <div class="header-tools">
+        <input id="globalSearch" type="search" placeholder="Поиск по всем разделам..." aria-label="Глобальный поиск" />
+        <button id="themeToggle" class="icon-btn" aria-label="Переключить тему">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero container">
+      <div>
+        <h1>Изучение географии без хаоса</h1>
+        <p>Изучайте карты, готовьтесь к экзаменам и учитесь по структурированным материалам.</p>
+        <div class="hero-actions">
+          <a href="maps.html" class="btn btn-primary">Смотреть карты</a>
+          <a href="exams.html" class="btn btn-secondary">Готовиться к экзаменам</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="container section"><h2>Быстрый доступ</h2><div class="grid quick-grid" id="quickAccess"></div></section>
+    <section class="container section" id="news"><h2>Последние новости</h2><div class="grid cards-grid" id="newsGrid"></div></section>
+    <section class="container section"><h2>Популярные карты</h2><div class="grid cards-grid" id="popularMapsGrid"></div></section>
+    <section class="container section"><h2>Статьи</h2><div class="grid cards-grid" id="articlesPreviewGrid"></div></section>
+  </main>
+
+  <div id="searchResults" class="search-results hidden"></div>
+
+  <footer class="site-footer"><div class="container footer-content"><div><h3>Контакты</h3><p>Email: hello@geomania.edu</p><p>Телефон: +1 (555) 123-4455</p></div><div><h3>Мы в соцсетях</h3><p><a href="#">Instagram</a> · <a href="#">YouTube</a> · <a href="#">X</a></p></div></div></footer>
+</body>
+</html>
