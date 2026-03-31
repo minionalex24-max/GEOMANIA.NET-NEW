@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geomania | Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="script.js"></script>
+</head>
+<body data-page="home">
+  <header class="site-header">
+    <div class="container header-content">
+      <a href="index.html" class="logo">Geomania</a>
+      <nav class="main-nav">
+        <a href="index.html" class="active">Home</a>
+        <a href="maps.html">Maps</a>
+        <a href="exams.html">Exams</a>
+        <a href="presentations.html">Presentations</a>
+        <a href="articles.html">Articles</a>
+        <a href="films.html">Films</a>
+        <a href="#news">News</a>
+      </nav>
+      <div class="header-tools">
+        <input id="globalSearch" type="search" placeholder="Search all content..." aria-label="Global Search" />
+        <button id="themeToggle" class="icon-btn" aria-label="Toggle dark mode">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero container">
+      <div>
+        <h1>Geography learning without chaos</h1>
+        <p>Explore maps, prepare for exams, and learn with structured, high-quality educational content.</p>
+        <div class="hero-actions">
+          <a href="maps.html" class="btn btn-primary">Explore Maps</a>
+          <a href="exams.html" class="btn btn-secondary">Prepare for Exams</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="container section">
+      <h2>Quick Access</h2>
+      <div class="grid quick-grid" id="quickAccess"></div>
+    </section>
+
+    <section class="container section" id="news">
+      <h2>Latest News</h2>
+      <div class="grid cards-grid" id="newsGrid"></div>
+    </section>
+
+    <section class="container section">
+      <h2>Popular Maps</h2>
+      <div class="grid cards-grid" id="popularMapsGrid"></div>
+    </section>
+
+    <section class="container section">
+      <h2>Articles Preview</h2>
+      <div class="grid cards-grid" id="articlesPreviewGrid"></div>
+    </section>
+  </main>
+
+  <div id="searchResults" class="search-results hidden"></div>
+
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <div>
+        <h3>Contacts</h3>
+        <p>Email: hello@geomania.edu</p>
+        <p>Phone: +1 (555) 123-4455</p>
+      </div>
+      <div>
+        <h3>Follow us</h3>
+        <p><a href="#">Instagram</a> · <a href="#">YouTube</a> · <a href="#">X</a></p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
