@@ -3,12 +3,11 @@ const STORAGE_KEY = 'geomaniaData';
 const AUTH_KEY = 'geomaniaAdminAuth';
 const LOCK_KEY = 'geomaniaAdminLock';
 
-// Precomputed PBKDF2 hashes (username and password) using the same salt/iterations.
 const AUTH = {
   saltBase64: 'gE7nD9sK2xQ4mV1p8YtR3A==',
   iterations: 150000,
-  usernameHash: 'l/y5N25w5eXSyRmOrjmgC/gAmkAZs8iPJfp8FZAUlc4=',
-  passwordHash: 'Afm++ioO+F+o8SBrTCg2gbjYv/VcJ6VQ7nYzr3IS64A='
+  usernameHash: 'axPgvUeH7Hcr7suAMRe3/mz6ntTxAbq/K3g9ZEOOw9w=',
+  passwordHash: 'F1m1GWtYhBzpDNq1gyFknGvPPcIOax8hwzFgUj90bFc='
 };
 
 const byId = (id) => document.getElementById(id);
@@ -76,6 +75,16 @@ async function deriveHash(value) {
   return btoa(String.fromCharCode(...new Uint8Array(bits)));
 }
 
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) return resolve('');
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error('Image read failed'));
+    reader.readAsDataURL(file);
+  });
+}
+
 function routeView() {
   byId('loginView').classList.toggle('hidden', isAuth());
   byId('dashboardView').classList.toggle('hidden', !isAuth());
@@ -110,11 +119,14 @@ async function loginHandler(e) {
   }
 }
 
-function addContentHandler(e) {
+async function addContentHandler(e) {
   e.preventDefault();
   const formData = new FormData(e.target);
   const type = formData.get('type');
   const data = getData();
+
+  const imageFile = formData.get('imageFile');
+  const image = await fileToDataUrl(imageFile && imageFile.size ? imageFile : null);
 
   const item = {
     id: crypto.randomUUID(),
@@ -123,7 +135,8 @@ function addContentHandler(e) {
     description: String(formData.get('description') || '').trim(),
     difficulty: String(formData.get('difficulty') || '').trim() || undefined,
     classLevel: String(formData.get('classLevel') || '').trim() || undefined,
-    tags: String(formData.get('tags') || '').split(',').map(t => t.trim()).filter(Boolean)
+    tags: String(formData.get('tags') || '').split(',').map(t => t.trim()).filter(Boolean),
+    image
   };
 
   if (!data[type] || !item.title || !item.category || !item.description) {

@@ -5,35 +5,44 @@ const FAV_KEY = 'geomaniaFavorites';
 
 const seedData = {
   maps: [
-    { id: crypto.randomUUID(), title: 'World Climate Zones', category: 'Climate', difficulty: 'Beginner', description: 'Interactive climate classification map.', tags: ['climate', 'zones'] },
-    { id: crypto.randomUUID(), title: 'Economic Regions of Europe', category: 'Economy', difficulty: 'Advanced', description: 'Compare GDP and trade corridors.', tags: ['economy', 'europe'] },
-    { id: crypto.randomUUID(), title: 'Countries and Capitals Drill', category: 'Countries', difficulty: 'Intermediate', description: 'Practice country-capital pairing.', tags: ['countries', 'capitals'] }
+    { id: crypto.randomUUID(), title: 'World Climate Zones', category: 'Climate', difficulty: 'Beginner', description: 'Interactive climate classification map.', tags: ['climate', 'zones'], image: '' },
+    { id: crypto.randomUUID(), title: 'Economic Regions of Europe', category: 'Economy', difficulty: 'Advanced', description: 'Compare GDP and trade corridors.', tags: ['economy', 'europe'], image: '' },
+    { id: crypto.randomUUID(), title: 'Countries and Capitals Drill', category: 'Countries', difficulty: 'Intermediate', description: 'Practice country-capital pairing.', tags: ['countries', 'capitals'], image: '' }
   ],
   exams: [
-    { id: crypto.randomUUID(), title: 'Plate Tectonics Basics', category: 'Theory', description: 'Core concepts and terminology.' },
-    { id: crypto.randomUUID(), title: 'Climate Data Interpretation', category: 'Practice', description: 'Interpret charts and map overlays.' },
-    { id: crypto.randomUUID(), title: 'Regional Geography Solutions Pack', category: 'Solutions', description: 'Step-by-step solution archive.' }
+    { id: crypto.randomUUID(), title: 'Plate Tectonics Basics', category: 'Theory', description: 'Core concepts and terminology.', image: '' },
+    { id: crypto.randomUUID(), title: 'Climate Data Interpretation', category: 'Practice', description: 'Interpret charts and map overlays.', image: '' },
+    { id: crypto.randomUUID(), title: 'Regional Geography Solutions Pack', category: 'Solutions', description: 'Step-by-step solution archive.', image: '' }
   ],
   presentations: [
-    { id: crypto.randomUUID(), title: 'Rivers of Asia', category: 'Hydrology', classLevel: 'Class 8', description: 'Major river systems and impacts.' },
-    { id: crypto.randomUUID(), title: 'Urbanization Patterns', category: 'Population', classLevel: 'Class 10', description: 'Global urban growth trends.' }
+    { id: crypto.randomUUID(), title: 'Rivers of Asia', category: 'Hydrology', classLevel: 'Class 8', description: 'Major river systems and impacts.', image: '' },
+    { id: crypto.randomUUID(), title: 'Urbanization Patterns', category: 'Population', classLevel: 'Class 10', description: 'Global urban growth trends.', image: '' }
   ],
   articles: [
-    { id: crypto.randomUUID(), title: 'How Mountains Form', category: 'Physical geography', description: 'Orogeny and plate boundaries explained.', tags: ['tectonics'] },
-    { id: crypto.randomUUID(), title: 'Global Trade Routes', category: 'Economic geography', description: 'How shipping lanes shape economies.', tags: ['trade', 'oceans'] },
-    { id: crypto.randomUUID(), title: 'Deserts That Once Were Green', category: 'Interesting facts', description: 'Paleoclimate evidence from deserts.', tags: ['deserts', 'history'] }
+    { id: crypto.randomUUID(), title: 'How Mountains Form', category: 'Physical geography', description: 'Orogeny and plate boundaries explained.', tags: ['tectonics'], image: '' },
+    { id: crypto.randomUUID(), title: 'Global Trade Routes', category: 'Economic geography', description: 'How shipping lanes shape economies.', tags: ['trade', 'oceans'], image: '' },
+    { id: crypto.randomUUID(), title: 'Deserts That Once Were Green', category: 'Interesting facts', description: 'Paleoclimate evidence from deserts.', tags: ['deserts', 'history'], image: '' }
   ],
   films: [
-    { id: crypto.randomUUID(), title: 'Blue Planet Frontiers', category: 'Nature', description: 'Ecosystems and biodiversity.' },
-    { id: crypto.randomUUID(), title: 'Storm Systems Explained', category: 'Climate', description: 'Mechanics of extreme weather.' },
-    { id: crypto.randomUUID(), title: 'Inside Japan', category: 'Countries', description: 'Culture and geographic constraints.' },
-    { id: crypto.randomUUID(), title: 'Earth Lab', category: 'Science', description: 'Geoscience breakthroughs.' },
-    { id: crypto.randomUUID(), title: 'The Atlas Archives', category: 'Documentaries', description: 'Historic cartography stories.' }
+    { id: crypto.randomUUID(), title: 'Blue Planet Frontiers', category: 'Nature', description: 'Ecosystems and biodiversity.', image: '' },
+    { id: crypto.randomUUID(), title: 'Storm Systems Explained', category: 'Climate', description: 'Mechanics of extreme weather.', image: '' },
+    { id: crypto.randomUUID(), title: 'Inside Japan', category: 'Countries', description: 'Culture and geographic constraints.', image: '' },
+    { id: crypto.randomUUID(), title: 'Earth Lab', category: 'Science', description: 'Geoscience breakthroughs.', image: '' },
+    { id: crypto.randomUUID(), title: 'The Atlas Archives', category: 'Documentaries', description: 'Historic cartography stories.', image: '' }
   ],
   news: [
-    { id: crypto.randomUUID(), title: 'New Volcano Monitoring Satellite', category: 'Science', description: 'A new platform improves eruption warnings.' },
-    { id: crypto.randomUUID(), title: 'Geomania Weekly Quiz Released', category: 'Education', description: 'Fresh practice set added for students.' }
+    { id: crypto.randomUUID(), title: 'New Volcano Monitoring Satellite', category: 'Science', description: 'A new platform improves eruption warnings.', image: '' },
+    { id: crypto.randomUUID(), title: 'Geomania Weekly Quiz Released', category: 'Education', description: 'Fresh practice set added for students.', image: '' }
   ]
+};
+
+const pageMap = {
+  maps: 'maps.html',
+  articles: 'articles.html',
+  news: 'index.html',
+  presentations: 'presentations.html',
+  films: 'films.html',
+  exams: 'exams.html'
 };
 
 const loadData = () => {
@@ -59,10 +68,14 @@ function initTheme() {
   document.documentElement.dataset.theme = saved;
 }
 
+function imageMarkup(item) {
+  return item.image ? `<img class="card-media" src="${item.image}" alt="${item.title}" loading="lazy" />` : '<div class="card-media"></div>';
+}
+
 function cardTemplate(item, type) {
   const isFav = state.favorites.includes(item.id);
   const tags = (item.tags || []).map(t => `<span class="tag">${t}</span>`).join('');
-  return `<article class="card"><button class="fav-btn" data-fav="${item.id}" title="Toggle favorite">${isFav ? '★' : '☆'}</button><h3>${item.title}</h3><p class="meta">${type} · ${item.category || 'General'} ${item.difficulty ? `· ${item.difficulty}` : ''} ${item.classLevel ? `· ${item.classLevel}` : ''}</p><p>${item.description}</p>${tags}</article>`;
+  return `<article class="card" id="item-${item.id}"><button class="fav-btn" data-fav="${item.id}" title="Toggle favorite">${isFav ? '★' : '☆'}</button>${imageMarkup(item)}<h3>${item.title}</h3><p class="meta">${type} · ${item.category || 'General'} ${item.difficulty ? `· ${item.difficulty}` : ''} ${item.classLevel ? `· ${item.classLevel}` : ''}</p><p>${item.description}</p>${tags}</article>`;
 }
 
 function withSkeleton(containerId, renderer) {
@@ -148,7 +161,11 @@ function setupGlobalSearch() {
       .filter(item => (`${item.title} ${item.description} ${item.category || ''}`.toLowerCase().includes(q)))
       .slice(0, 12);
 
-    box.innerHTML = results.map(r => `<div class="card"><p class="meta">${r.source}</p><h3>${r.title}</h3><p>${r.description}</p></div>`).join('') || '<p class="muted">No matches.</p>';
+    box.innerHTML = results.map(r => {
+      const page = pageMap[r.source] || 'index.html';
+      const href = `${page}#item-${r.id}`;
+      return `<a class="search-link" href="${href}"><div class="card">${imageMarkup(r)}<p class="meta">${r.source}</p><h3>${r.title}</h3><p>${r.description}</p></div></a>`;
+    }).join('') || '<p class="muted">No matches.</p>';
     box.classList.remove('hidden');
   });
 
@@ -167,6 +184,13 @@ function setupFavorites() {
   });
 }
 
+function scrollToHashTarget() {
+  const targetId = window.location.hash?.replace('#', '');
+  if (!targetId) return;
+  const target = document.getElementById(targetId);
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 function init() {
   initTheme();
   document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
@@ -182,6 +206,7 @@ function init() {
   if (page === 'films') renderFilms();
 
   saveData(state.data);
+  setTimeout(scrollToHashTarget, 260);
 }
 
 document.addEventListener('DOMContentLoaded', init);
