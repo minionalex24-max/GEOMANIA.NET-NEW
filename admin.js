@@ -3,7 +3,6 @@ const STORAGE_KEY = 'geomaniaData';
 const AUTH_KEY = 'geomaniaAdminAuth';
 const LOCK_KEY = 'geomaniaAdminLock';
 
-// PBKDF2 hashes for username KScalling and password letovo_KS1234.
 const AUTH = {
   saltBase64: 'gE7nD9sK2xQ4mV1p8YtR3A==',
   iterations: 150000,
